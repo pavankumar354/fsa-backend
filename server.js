@@ -25,31 +25,6 @@ passportUtility(app);
 app.use(express.json());
 
 
-// initialize google auth
-// app.get('/google', passport.authenticate("google", {
-//         scope: ['profile', 'email']
-// },
-// console.log("hello")
-// )
-    
-// );
-
-// app.get("/auth/google/callback", passport.authenticate("google", {
-//     successRedirect: "http://localhost3000/dashboard",
-//     failureRedirect: "http://localhost3000/login",
-// }));
-
-// app.get("/login/success", async (req, res) => {
-//     console.log("req", req.user)
-//     if (req.user) {
-//         res.status(200).send({ message: "User Logged in", user: req.user });
-//     } else {
-//         res.status(400).send({ message: "Not authorized" });
-//     }
-// })
-
-
-
 // connection to DB
 mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log("DB Connected"))

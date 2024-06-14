@@ -67,44 +67,6 @@ exports.loginController = async (req, res) => {
 };
 
 // mail otp
-// exports.otpController = async (req, res) => {
-//     // console.log(req.body)
-//     const { email } = req.body;
-//     const otp = generateOtp();
-//     try {
-//       const user = await UserData.findOneAndUpdate(
-//         { email : email },
-//         { otp },
-//         { new: true }
-//       );
-//       if (!user) {
-//         return res.status(400).send({ success:false, message:"User Not Found"});
-//       } else {
-//         // for mail user otp sending code
-//         let transporter = nodemailer.createTransport({
-//             service: "gmail",
-//             auth: {
-//               user: "karthikreddy7877@gmail.com",
-//               pass: "fbrqwbdatrtkcwpw",
-//             },
-//           });
-//           const options = {
-//             from: "karthikreddy7877@gmail.com",
-//             to: email,
-//             subject: "otp for login",
-//             text: `otp : ${otp} `,
-//           };
-//           await transporter.sendMail(options);
-//           return res
-//             .status(200)
-//             .send({ success: true, message: "OTP sent to your mail" });
-//       }
-//     } catch (err) {
-//       console.error(err);
-//       return res.status(500).send({ success: "false", message: "Internal Server Error" });
-//     }
-// };
-
 exports.otpController = async (req, res) => {
     const { email } = req.body;
     // console.log(email);
@@ -167,7 +129,7 @@ exports.otpController = async (req, res) => {
         .status(500)
         .send({ success: false, message: "Internal server Error" });
     }
-  };
+};
   
 // otp verify and login controller
 exports.verifyOtpController = async (req, res) => { 
