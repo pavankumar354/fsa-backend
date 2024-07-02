@@ -56,7 +56,8 @@ exports.loginController = async (req, res) => {
         return res.status(200).send({
           success: true,
           message: "Login Success",
-          token
+          token,
+          adminCheck:user.admin,
         });
 
     } catch (error) {
