@@ -8,7 +8,7 @@ const passportUtility = (app) => {
     session({
       secret: process.env.SESSION_SECRET,
       resave: false,
-        saveUninitialized: true
+      saveUninitialized: true
     })
     );
 
@@ -20,7 +20,7 @@ const passportUtility = (app) => {
             {
                 clientID: process.env.CLIENT_ID,
                 clientSecret: process.env.CLIENT_SECRET,
-                callbackURL: "/auth/google/callback",
+                callbackURL: "http://localhost:8000/auth/google/callback",
                 scope: ["profile", "email"]
             },
             (accessToken, refreshToken, profile, callback) => {

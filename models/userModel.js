@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
     },
     googleId: {
         type: String
+    },
+    admin: {
+        type: Boolean,
+        default: false
     }
 });
 

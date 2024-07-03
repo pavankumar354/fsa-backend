@@ -31,6 +31,8 @@ app.use(cors({
     credentials: true
 }));
 
+app.use(express.static("public"))
+
 passportUtility(app);
 app.use(express.json());
 
@@ -44,6 +46,12 @@ const PORT = process.env.PORT || 5000;
 
 // Auth Routes
 app.use("/auth", require("./routes/authRoutes"));
+
+// Admin Routes
+app.use("/admin", require("./routes/adminRoutes"));
+
+// services routes
+app.use("/services", require("./routes/servicesRoutes"));
 
 
 // app.use("/User", require("./routes/authRoutes"));

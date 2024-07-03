@@ -38,9 +38,9 @@ router.route("/newpassword").post(NewPasswordController);
 router.route("/Vendornewpassword").post(NewPasswordController);
 
 // forward to google
-// router.get('/google', passport.authenticate("google", {
-//     scope: ['profile', 'email']
-//   }));
+router.get('/google', passport.authenticate("google", {
+    scope: ['profile', 'email']
+  }));
 
 // google authentication
 router.route("/google/callback").get(passport.authenticate("google", {
@@ -53,18 +53,18 @@ router.route("/google/callback").get(passport.authenticate("google", {
 
 
 // forwarding request to google auth
-router.get("/google", async (req, res) => {
-    // console.log("hello")
-    try {
-        const response = await axios.get("https://accounts.google.com/o/oauth2/v2/auth", {
-            params: req.query
-        })
-        console.log(response);
-        // res.send(response)
-    } catch (error) {
-        console.log(error)
-    }
-});
+// router.get("/google", async (req, res) => {
+//     // console.log("hello")
+//     try {
+//         const response = await axios.get("https://accounts.google.com/o/oauth2/v2/auth", {
+//             params: req.query
+//         })
+//         console.log(response);
+//         // res.send(response)
+//     } catch (error) {
+//         console.log(error)
+//     }
+// });
 
 // // register or signi user to db
 router.get("/login/success", async (req, res) => {
