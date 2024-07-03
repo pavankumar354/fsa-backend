@@ -56,14 +56,30 @@ app.listen(PORT, () => {
 
 
 // // user get data
-app.get("/getdata", async (req, res) => {
+// app.get("/getdata", async (req, res) => {
+//     try {
+//         const users = await userDocument.find({});
+//         res.json(users);
+//     } catch (err) {
+//         res.status(500).json({ error: "An error occurred while fetching data", details: err });
+//     }
+// });
+app.get('/getData', async (req, res) => {
     try {
-        const users = await userDocument.find({});
-        res.json(users);
+      const page = parseInt(req.query.page) || 0;
+      const limit = parseInt(req.query.limit) || 5;
+  
+      const users = await userDocument.find()
+        .skip(page * limit)
+        .limit(limit);
+  
+      const total = await userDocument.countDocuments();
+  
+      res.json({ users, total });
     } catch (err) {
-        res.status(500).json({ error: "An error occurred while fetching data", details: err });
+      res.status(500).send(err);
     }
-});
+  });
 // user post data
 app.post("/CreateUsers", async (req, res) => {
     const { name, email, number, address } = req.body;
