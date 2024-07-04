@@ -32,7 +32,7 @@ mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log("DB Connected"))
 .catch((error) => console.log(error));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4444;
 
 // Auth Routes
 app.use("/auth", require("./routes/authRoutes"));
