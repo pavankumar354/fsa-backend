@@ -47,6 +47,10 @@ const PORT = process.env.PORT || 5000;
 // Auth Routes
 app.use("/auth", require("./routes/authRoutes"));
 
+
+// Review Routes
+app.use("/api/reviews", require("./routes/reviewRoutes"));
+
 // Admin Routes
 app.use("/admin", require("./routes/adminRoutes"));
 
@@ -55,6 +59,7 @@ app.use("/services", require("./routes/servicesRoutes"));
 
 
 // app.use("/User", require("./routes/authRoutes"));
+
 
 
 
