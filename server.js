@@ -35,6 +35,8 @@ const PORT = process.env.PORT || 5000;
 // Auth Routes
 app.use("/auth", require("./routes/authRoutes"));
 
+// Review Routes
+app.use("/api/reviews", require("./routes/reviewRoutes"));
 
 
 app.listen(PORT, () => {
