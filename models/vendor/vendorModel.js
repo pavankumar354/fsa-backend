@@ -18,13 +18,9 @@ const userSchema = new mongoose.Schema({
     },
     googleId: {
         type: String
-    },
-    admin: {
-        type: Boolean,
-        default: false
     }
 });
 
-const UserData = mongoose.model("UserData", userSchema);
+const UserData = mongoose.model("VendorData", userSchema);
 
 module.exports = UserData;

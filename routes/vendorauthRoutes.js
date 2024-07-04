@@ -1,49 +1,56 @@
 const express = require("express");
-const { SignupController, otpController, verifyOtpController, NewPasswordController  } = require("../controllers/authController");
+const { SignupController, otpController, verifyOtpController, NewPasswordController, userDocumentController  } = require("../controllers/authController");
 const { loginController } = require("../controllers/authController");
 const passport = require("passport");
 const axios = require("axios");
 const UserData = require("../models/userModel");
 const VendorData = require("../models/vendor/vendorModel")// vendor data for registration of restaurent manager
+const userDocument = require("../models/user/userDocument")
 require('dotenv').config();
 const jwt = require("jsonwebtoken");
 // const jwtAuth = require("../middlewares/jwtAuth");
 
-const router = express.Router();
+const VendorRouter = express.Router();
 
 // Register Route
-router.route("/signup").post(SignupController);
+// router.route("/signup").post(SignupController);
 // vendor register rout
-router.route("/Vendorsignup").post(SignupController);
+VendorRouter.route("/Vendorsignup").post(SignupController);
 
 
 // login Route
-router.route("/login").post(loginController);
+// router.route("/login").post(loginController);
 // vendor login
-router.route("/Vendorlogin").post(loginController);
+VendorRouter.route("/Vendorlogin").post(loginController);
 
 // opt route for mail
-router.route("/sendotp").post(otpController);
+// router.route("/sendotp").post(otpController);
 // vendor send otp
-router.route("/Vendorsendotp").post(otpController);
+VendorRouter.route("/Vendorsendotp").post(otpController);
 
 // otp verify
-router.route("/otpverify").post(verifyOtpController);
+// router.route("/otpverify").post(verifyOtpController);
 //Vendor otp verify
-router.route("/Vendorotpverify").post(verifyOtpController);
+VendorRouter.route("/Vendorotpverify").post(verifyOtpController);
 
 // set new password
-router.route("/newpassword").post(NewPasswordController);
+// router.route("/newpassword").post(NewPasswordController);
 // vendor set new password
-router.route("/Vendornewpassword").post(NewPasswordController);
+VendorRouter.route("/Vendornewpassword").post(NewPasswordController);
+
+
+
+// user documentation controller
+
+// VendorRouter.route("/CreateUsers").post(userDocumentController);
 
 // forward to google
-router.get('/google', passport.authenticate("google", {
-    scope: ['profile', 'email']
-  }));
+// router.get('/google', passport.authenticate("google", {
+//     scope: ['profile', 'email']
+//   }));
 
 // google authentication
-router.route("/google/callback").get(passport.authenticate("google", {
+VendorRouter.route("/google/callback").get(passport.authenticate("google", {
     successRedirect: "http://localhost:3000",
     failureRedirect:"http://localhost:3000/login"
 }));
@@ -53,31 +60,31 @@ router.route("/google/callback").get(passport.authenticate("google", {
 
 
 // forwarding request to google auth
-// router.get("/google", async (req, res) => {
-//     // console.log("hello")
-//     try {
-//         const response = await axios.get("https://accounts.google.com/o/oauth2/v2/auth", {
-//             params: req.query
-//         })
-//         console.log(response);
-//         // res.send(response)
-//     } catch (error) {
-//         console.log(error)
-//     }
-// });
+VendorRouter.get("/google", async (req, res) => {
+    // console.log("hello")
+    try {
+        const response = await axios.get("https://accounts.google.com/o/oauth2/v2/auth", {
+            params: req.query
+        })
+        console.log(response);
+        // res.send(response)
+    } catch (error) {
+        console.log(error)
+    }
+});
 
 // // register or signi user to db
-router.get("/login/success", async (req, res) => {
+VendorRouter.get("/login/success", async (req, res) => {
     if (req.user) {
         // console.log(req.user)
-        const userExists = await UserData.findOne({ email: req.user._json.email });
+        const userExists = await VendorData.findOne({ email: req.user._json.email });
         // console.log(userExists)
         if (userExists) {
             const token = jwt.sign({ _id: userExists._id }, process.env.JWT_SECRET_KEY, { expiresIn: '2d' });
             // console.log(token)
             res.status(200).send({success:true, message: "User Logged in", user: req.user, token })
         } else {
-            const newUser = new UserData({
+            const newUser = new VendorData({
                 email: req.user._json.email,
                 password: Date.now(),
                 firstName: req.user._json.given_name,
@@ -92,11 +99,11 @@ router.get("/login/success", async (req, res) => {
 });
 
 
-router.get("/login/failed", (req, res) => {
+VendorRouter.get("/login/failed", (req, res) => {
     res.status(401).send({ message: "Login failed" });
 })
 
-router.get("/logout", (req, res) => {
+VendorRouter.get("/logout", (req, res) => {
     req.logOut(err => {
         if (err) {
             console.log(err)
@@ -106,8 +113,5 @@ router.get("/logout", (req, res) => {
 })
 
 
-    
-    
 
-
-module.exports = router;
+module.exports = VendorRouter;
