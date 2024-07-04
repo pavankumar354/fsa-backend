@@ -1,5 +1,5 @@
 const { RatingReview, Report } = require('../models/Review');
-const User = require('../models/User');
+const User = require('../models/userModel');
 const mongoose = require('mongoose');
 
 exports.submitReview = async (req, res) => {
