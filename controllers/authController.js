@@ -11,7 +11,7 @@ const passport = require("passport");
 
 
 ///// Signup controller
-exports.SignupController = async (req, res) => { 
+exports.UserSignupController = async (req, res) => { 
     try {
         // console.log(req.body)
         const { firstName, lastName, email, phoneNumber, password } = req.body;
@@ -32,7 +32,7 @@ exports.SignupController = async (req, res) => {
 };
 
 // Login Controller
-exports.loginController = async (req, res) => {
+exports.UserloginController = async (req, res) => {
     try {
         // console.log(req.body)
         const { email, password } = req.body;
@@ -50,7 +50,7 @@ exports.loginController = async (req, res) => {
         // compare password
         const passwordCheck = await bcrypt.compare(password, user.password);
         if (!passwordCheck) {
-            console.log("true")
+            // console.log("true")
             return res.status(400).send({ success: false, message: "Incorrect Password" });
         }
         // creating token
@@ -70,7 +70,7 @@ exports.loginController = async (req, res) => {
 };
 
 // mail otp
-exports.otpController = async (req, res) => {
+exports.UserOtpController = async (req, res) => {
     const { email } = req.body;
     // console.log(email);
     let transporter = nodemailer.createTransport({
@@ -135,7 +135,7 @@ exports.otpController = async (req, res) => {
 };
   
 // otp verify and login controller
-exports.verifyOtpController = async (req, res) => { 
+exports.UserverifyOtpController = async (req, res) => { 
     try {
       // console.log(req.body)
       const { email, otp } = req.body;
@@ -332,7 +332,7 @@ exports.verifyOtpController = async (req, res) => {
 };
 
 // set new password
-exports.NewPasswordController = async (req, res) => {
+exports.UserNewPasswordController = async (req, res) => {
   try {
       // console.log(req.body)
       const { email, password } = req.body;

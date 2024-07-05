@@ -1,39 +1,39 @@
+require('dotenv').config();
 const express = require("express");
-const { SignupController, otpController, verifyOtpController, NewPasswordController  } = require("../controllers/authController");
-const { loginController } = require("../controllers/authController");
+const { loginController, SignupController, otpController, verifyOtpController, NewPasswordController, UserSignupController, UserloginController, UserOtpController, UserverifyOtpController, UserNewPasswordController  } = require("../controllers/authController");
 const passport = require("passport");
 const axios = require("axios");
 const UserData = require("../models/userModel");
 const VendorData = require("../models/vendor/vendorModel")// vendor data for registration of restaurent manager
-require('dotenv').config();
+
 const jwt = require("jsonwebtoken");
 // const jwtAuth = require("../middlewares/jwtAuth");
 
 const router = express.Router();
 
 // Register Route
-router.route("/signup").post(SignupController);
+router.route("/signup").post(UserSignupController);
 // vendor register rout
 router.route("/Vendorsignup").post(SignupController);
 
 
 // login Route
-router.route("/login").post(loginController);
+router.route("/login").post(UserloginController);
 // vendor login
 router.route("/Vendorlogin").post(loginController);
 
 // opt route for mail
-router.route("/sendotp").post(otpController);
+router.route("/sendotp").post(UserOtpController);
 // vendor send otp
 router.route("/Vendorsendotp").post(otpController);
 
 // otp verify
-router.route("/otpverify").post(verifyOtpController);
+router.route("/otpverify").post(UserverifyOtpController);
 //Vendor otp verify
 router.route("/Vendorotpverify").post(verifyOtpController);
 
 // set new password
-router.route("/newpassword").post(NewPasswordController);
+router.route("/newpassword").post(UserNewPasswordController);
 // vendor set new password
 router.route("/Vendornewpassword").post(NewPasswordController);
 
