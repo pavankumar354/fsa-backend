@@ -6,6 +6,7 @@ const UserData = require("./models/userModel");
 const VendorData = require("./models/vendor/vendorModel")// vendor data for registration of restaurent manager
 const userDocument = require("./models/user/userDocument")
 const vendorRouter = require('./routes/vendorauthRoutes')//vendor router
+const vendorRoutes= require("./routes/vendorRoutes")
 const passportUtility = require("./utils/passport");
 const passport = require('passport');
 // const apiRoutes = require("./routes/apiRoutes")
@@ -21,6 +22,7 @@ app.use((req, res, next) => {
 //vendor router
 app.use(vendorRouter);
 app.use("/api/users", vendorRouter);
+
 // user routes from apiRoutes
 // app.use('/api', apiRoutes); // Adjust the base path as needed
 
@@ -58,7 +60,8 @@ app.use("/admin", require("./routes/adminRoutes"));
 app.use("/services", require("./routes/servicesRoutes"));
 
 
-// app.use("/User", require("./routes/authRoutes"));
+// vendor routes
+app.use('/api/vendors', vendorRoutes);
 
 
 
