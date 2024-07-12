@@ -1,18 +1,20 @@
+
 const mongoose = require('mongoose');
 const validator = require('validator');
 
 const vendorSchema = new mongoose.Schema({
+ 
+  category: {
+    type: String,
+    required: [true, 'Category is required'],
+    trim: true
+  },
   serviceName: {
     type: String,
     required: [true, 'Service name is required'],
     trim: true,
     minlength: [3, 'Service name must be at least 3 characters long'],
     maxlength: [100, 'Service name must be less than 100 characters long']
-  },
-  category: {
-    type: String,
-    required: [true, 'Category is required'],
-    trim: true
   },
   vendorName: {
     type: String,
@@ -34,7 +36,7 @@ const vendorSchema = new mongoose.Schema({
     required: [true, 'Mobile number is required'],
     validate: {
       validator: function(v) {
-        return /\d{10}/.test(v); 
+        return /\d{10}/.test(v);
       },
       message: props => `${props.value} is not a valid mobile number!`
     }
@@ -50,7 +52,38 @@ const vendorSchema = new mongoose.Schema({
     trim: true,
     minlength: [3, 'Location must be at least 3 characters long'],
     maxlength: [100, 'Location must be less than 100 characters long']
-  }
+  },
+  businessName: {
+    type: String,
+    required: [true, 'Business name is required'],
+    trim: true,
+    minlength: [3, 'Business name must be at least 3 characters long'],
+    maxlength: [100, 'Business name must be less than 100 characters long']
+  },
+  serviceArea: {
+    type: String,
+    required: [true, 'Service area is required'],
+    trim: true,
+    minlength: [3, 'Service area must be at least 3 characters long'],
+    maxlength: [100, 'Service area must be less than 100 characters long']
+  },
+  licenseNumber: {
+    type: String,
+    trim: true
+  },
+  licenseDocument: {
+    type: String, // or Buffer
+    trim: true
+  },
+  certifications: [
+    {
+      document: {
+        type: String, // or Buffer
+        trim: true
+      }
+    }
+  ],
+  Acess: { type: Boolean, default: true }
 });
 
 module.exports = mongoose.model('Vendor', vendorSchema);
