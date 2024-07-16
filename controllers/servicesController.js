@@ -76,36 +76,81 @@ const GetServicesController = async (req, res) => {
     }
 }
 
-// serach services
-const SearchServicesController = async (req, res) => {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 6;
-    const skip = (page - 1) * limit;
-  try {
-    const {name} = req.query;
-    // console.log(req.query)
-    const queryObject = {};
-    if (name) {
-      queryObject.name = {$regex:name, $options:'i'}
-    }
-    // console.log(queryObject)
+// search services
 
-    const totalServicesCount = await ServicesData.countDocuments();
-    const totalPages = Math.ceil(totalServicesCount / limit);
-    // console.log(totalPages)
+// const SearchServicesController = async (req, res) => {
+//     const page = Number(req.query.page) || 1;
+//     const limit = Number(req.query.limit) || 6;
+//     const skip = (page - 1) * limit;
+//   try {
+//     const {name} = req.query;
+//     // console.log(req.query)
+//     const queryObject = {};
+//     if (name) {
+//       queryObject.name = {$regex:name, $options:'i'}
+//     }
+//     // console.log(queryObject)
+
+//     const totalServicesCount = await ServicesData.countDocuments();
+//     const totalPages = Math.ceil(totalServicesCount / limit);
+//     // console.log(totalPages)
     
-    const services = await ServicesData.find(queryObject).skip(skip).limit(limit);
-      return res
-      .status(201)
-      .send({ success: true, message: "search Success", services, totalServicesCount, page, limit, totalPages });
+//     const services = await ServicesData.find(queryObject).skip(skip).limit(limit);
+//       return res
+//       .status(201)
+//       .send({ success: true, message: "search Success", services, totalServicesCount, page, limit, totalPages });
       
+//   } catch (error) {
+//       console.log(error);
+//   return res
+//     .status(500)
+//     .send({ success: false, message: "Internal Server Error" });
+//   }
+// }
+
+const SearchServicesController = async (req, res) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 6;
+  const skip = (page - 1) * limit;
+
+  try {
+    const { name } = req.query;
+    const queryObject = {};
+
+    if (name) {
+      queryObject.name = { $regex: name, $options: 'i' };
+    }
+
+    const totalServicesCount = await ServicesData.countDocuments(queryObject);
+    const totalPages = Math.ceil(totalServicesCount / limit);
+
+    const services = await ServicesData.find(queryObject).skip(skip).limit(limit);
+
+    // Adding serial number to each service
+    const servicesWithSerialNumbers = services.map((service, index) => ({
+      ...service.toObject(),
+      serialNumber: skip + index + 1,
+    }));
+
+    return res.status(201).send({
+      success: true,
+      message: "Search Success",
+      services: servicesWithSerialNumbers,
+      totalServicesCount,
+      page,
+      limit,
+      totalPages,
+    });
+
   } catch (error) {
-      console.log(error);
-  return res
-    .status(500)
-    .send({ success: false, message: "Internal Server Error" });
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
-}
+};
+
 
 // getting a service with id
 const OneServiceController = async (req, res) => {
