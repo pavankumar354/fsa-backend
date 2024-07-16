@@ -1,43 +1,134 @@
-const Vendor = require('../models/Vendor');
+const Vendor = require('../../models/Admin-Vendor');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
+const multer = require('multer');
+const path = require('path');
+
+// Set storage engine for multer
+const storage = multer.diskStorage({
+  destination: './uploads/',
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  }
+});
+
+// Initialize upload
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10000000 }, // 10MB limit
+  fileFilter: function (req, file, cb) {
+    checkFileType(file, cb);
+  }
+}).fields([
+  { name: 'licenseDocument', maxCount: 1 },
+  { name: 'certifications', maxCount: 10 }
+]);
+
+// Check file type
+function checkFileType(file, cb) {
+  const filetypes = /jpeg|jpg|png|pdf/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error('Error: Images and PDFs only!'));
+  }
+}
 
 // Register vendor
 exports.registerVendor = async (req, res) => {
-  const { serviceName, category, vendorName, email, mobileNumber, password, location } = req.body;
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const vendor = new Vendor({ serviceName, category, vendorName, email, mobileNumber, password: hashedPassword, location });
-    await vendor.save();
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
 
-    // Send email
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: 'janakiramudayagiri766@gmail.com',
-        pass: 'ijne vteh hxre wmum'
-      }
-    });
+    console.log('Form data:', req.body);
+    console.log('Files:', req.files);
 
-    const mailOptions = {
-      from: 'janakiramudayagiri766@gmail.com',
-      to: email,
-      subject: 'Vendor Registration',
-      text: `Your account has been created.\nUsername: ${email}\nPassword: ${password}`
-    };
+    const {
+      serviceName, category, vendorName, email, mobileNumber, password, location,
+      businessName, serviceArea, licenseNumber, Acess
+    } = req.body;
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        return console.log(error);
-      }
-      console.log('Email sent: ' + info.response);
-    });
+    let licenseDocument = '';
+    if (req.files && req.files['licenseDocument']) {
+      licenseDocument = req.files['licenseDocument'][0].path;
+    }
 
-    res.status(201).json({ message: 'Vendor registered successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    let certifications = [];
+    if (req.files && req.files['certifications']) {
+      certifications = req.files['certifications'].map(file => ({ document: file.path }));
+    }
+
+    try {
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 7);
+
+      // Create a new vendor instance
+      const vendor = new Vendor({
+        serviceName, category, vendorName, email, mobileNumber, password: hashedPassword, location,
+        businessName, serviceArea, licenseNumber, licenseDocument, certifications, Acess
+      });
+
+      // Save the vendor to the database
+      await vendor.save();
+
+      // Send email to the vendor
+      const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+          user: process.env.EMAIL_USER, // Move credentials to environment variables
+          pass: process.env.EMAIL_PASS  // Move credentials to environment variables
+        }
+      });
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Welcome to Find Dubai - Vendor Account Created',
+        text: `Dear ${vendorName},
+
+Welcome to Find Dubai!
+
+Your vendor account has been successfully created. Here are your login credentials:
+
+Username: ${email}
+Password: ${password}
+
+You can log in to your account using the following link: "testlink"
+
+Once logged in, you can update your profile, manage your services, and start reaching out to potential customers.
+
+If you have any questions or need assistance, feel free to contact our support team at janakiramudayagiri@gmail.com or +91 766xxxxxxx.
+
+We look forward to your success with Find Dubai!
+
+Best regards,
+Janakiram (sample)
+Admin
+Find Dubai`
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Error sending email:', error);
+        } else {
+          console.log('Email sent:', info.response);
+        }
+      });
+
+      res.status(201).json({ message: 'Vendor registered successfully' });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
 };
+
+
+
 
 // Login vendor
 exports.loginVendor = async (req, res) => {
@@ -72,17 +163,93 @@ exports.getVendors = async (req, res) => {
   }
 };
 
-// Update vendor
+//update vendor
 exports.updateVendor = async (req, res) => {
   const { id } = req.params;
+
+  console.log('Files received:', req.files);  // Add this log
+  console.log('Form data:', req.body);
+
   const updateData = req.body;
+
+  if (req.files && req.files['licenseDocument']) {
+    updateData.licenseDocument = req.files['licenseDocument'][0].path;
+  }
+
+  if (req.files && req.files['certifications']) {
+    updateData.certifications = req.files['certifications'].map(file => ({ document: file.path }));
+  }
+
   try {
+    // Check if password is being updated
+    if (updateData.password) {
+      // Store the plain text password before hashing
+      const plainTextPassword = updateData.password;
+
+      // Hash the new password
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+      
+      // Include plain text password in email
+      updateData.plainTextPassword = plainTextPassword;
+    }
+
     const vendor = await Vendor.findByIdAndUpdate(id, updateData, { new: true });
+
+    // Send email to the vendor
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: vendor.email, 
+      subject: 'Find Dubai - Vendor Profile Updated',
+      text: `Dear ${vendor.vendorName},
+
+Your vendor profile on Find Dubai has been updated successfully.
+
+Here are the updated details:
+Service Name: ${vendor.serviceName}
+Category: ${vendor.category}
+Vendor Name: ${vendor.vendorName}
+Email: ${vendor.email}
+Password: ${updateData.plainTextPassword} 
+Mobile Number: ${vendor.mobileNumber}
+Location: ${vendor.location}
+Business Name: ${vendor.businessName}
+Service Area: ${vendor.serviceArea}
+License Number: ${vendor.licenseNumber}
+Access: ${vendor.Acess}
+
+Thank you for keeping your profile up-to-date with us.
+
+Best regards,
+Janakiram (sample)
+Admin
+Find Dubai`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+      } else {
+        console.log('Email sent:', info.response);
+      }
+    });
+
     res.status(200).json(vendor);
   } catch (error) {
+    console.error('Update error:', error); 
     res.status(500).json({ error: error.message });
   }
 };
+
+
+
 
 // Delete vendor
 exports.deleteVendor = async (req, res) => {
@@ -95,7 +262,7 @@ exports.deleteVendor = async (req, res) => {
   }
 };
 
-
+// Get all categories
 exports.getCategories = async (req, res) => {
   try {
     const categories = [
@@ -107,7 +274,7 @@ exports.getCategories = async (req, res) => {
       'Events and Entertainment',
       'Education and Tutoring',
       'Food and Dining',
-      'Pets and Animals',
+      'Pet and Animal Services',
       'Real Estate Services',
       'Travel and Transportation',
       'Home Improvement',
@@ -117,7 +284,6 @@ exports.getCategories = async (req, res) => {
       'Wellness and Alternative Medicine',
       'Arts and Crafts',
       'Sports and Recreation'
-
     ];
     res.status(200).json(categories);
   } catch (error) {
@@ -125,7 +291,7 @@ exports.getCategories = async (req, res) => {
   }
 };
 
-// Add this new function to fetch service names based on category
+// Fetch service names based on category
 exports.getServiceNames = async (req, res) => {
   const { category } = req.query;
   const services = {
@@ -137,7 +303,7 @@ exports.getServiceNames = async (req, res) => {
     'Events and Entertainment': ['Event Planning', 'Catering Services', 'DJ Services', 'Photography and Videography', 'Live Bands and Musicians', 'Party Rentals', 'Entertainers (Magicians, Clowns, etc.)', 'Event Venues', 'Event Decorators', 'Corporate Entertainment'],
     'Education and Tutoring': ['Private Tutoring', 'Test Preparation (SAT, GRE, etc.)', 'Language Classes', 'Music Lessons', 'Art Classes', 'STEM Education', 'Driving Schools', 'Online Learning Platforms', 'Educational Workshops', 'Summer Camps'],
     'Food and Dining': ['Restaurants', 'Catering Services', 'Food Trucks', 'Bakeries and Dessert Shops', 'Coffee Shops', 'Wine and Spirits', 'Farmers Markets', 'Specialty Food Stores', 'Meal Prep Services', 'Food Delivery Services'],
-    'Pet and Animal Services': ['Veterinary Clinics', 'Pet Grooming', 'Pet Boarding and Daycare', 'Pet Training', 'Pet Sitting', 'Pet Adoption Centers', 'Animal Shelters', 'Pet Supply Stores', 'Mobile Pet Services', 'Pet Photography'],
+    'Pet and Animal Services': ['Veterinary Clinics','Pet Grooming', 'Pet Boarding and Daycare', 'Pet Training', 'Pet Sitting', 'Pet Adoption Centers', 'Animal Shelters', 'Pet Supply Stores', 'Mobile Pet Services', 'Pet Photography'],
     'Real Estate Services': ['Real Estate Agents', 'Property Management', 'Real Estate Appraisal', 'Real Estate Consulting', 'Mortgage Brokers', 'Real Estate Investment', 'Home Staging', 'Real Estate Photography', 'Commercial Real Estate', 'Real Estate Development'],
     'Travel and Transportation': ['Travel Agencies', 'Taxi and Rideshare Services', 'Chauffeur Services', 'Bike Rentals', 'Boat Charters', 'Bus Services', 'Flight Booking', 'Tour Guides', 'Carpooling Services', 'Airport Shuttles'],
     'Home Improvement': ['Interior Design', 'Landscaping Services', 'Pool Services', 'Home Automation', 'Security Systems Installation', 'Solar Panel Installation', 'Window Installation', 'Flooring Services', 'Kitchen Remodeling', 'Bathroom Remodeling'],

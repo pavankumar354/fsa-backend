@@ -6,7 +6,7 @@ const UserData = require("./models/userModel");
 const VendorData = require("./models/vendor/vendorModel")// vendor data for registration of restaurent manager
 const userDocument = require("./models/user/userDocument")
 const vendorRouter = require('./routes/vendorauthRoutes')//vendor router
-const vendorRoutes= require("./routes/vendorRoutes")
+const AdminvendorRoutes= require("./routes/Admin-vendorRoutes")
 const passportUtility = require("./utils/passport");
 const passport = require('passport');
 // const apiRoutes = require("./routes/apiRoutes")
@@ -61,7 +61,7 @@ app.use("/services", require("./routes/servicesRoutes"));
 
 
 // vendor routes
-app.use('/api/vendors', vendorRoutes);
+app.use('/api/vendors', AdminvendorRoutes);
 
 
 
