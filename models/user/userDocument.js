@@ -13,10 +13,13 @@
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
-    name: String,
+    firstName: String,
+    lastName: String,
+    phone: String,
+    zip: String,
     email: String,
-    number: Number,
-    address : String,
+    password: String
+    
 });
 
 const UserModule = mongoose.model("usersData", UserSchema);
