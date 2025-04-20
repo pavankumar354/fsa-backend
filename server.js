@@ -20,7 +20,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Enable CORS
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: [
+    "http://localhost:3000",                     // for local dev
+    "https://fullstackacademy.vercel.app"        // your deployed frontend
+  ],
   methods: "GET, POST, PATCH, DELETE, PUT",
   credentials: true,
 }));
@@ -33,6 +36,12 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
 .then(() => console.log("✅ MongoDB Connected"))
 .catch((error) => console.error("❌ MongoDB connection error:", error));
+
+
+app.get("/", (req, res) => {
+  res.send("✅ Backend is live!");
+});
+
 
 // ----------------------------- ROUTES -----------------------------
 
