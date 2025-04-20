@@ -1,13 +1,4 @@
 
-// const mongoose = require('mongoose');
-
-
-// const UserModel = mongoose.model('user', {
-//     title: String,
-//     description: String,
-// });
-
-// module.exports = UserModel
 
 
 const mongoose = require("mongoose");
